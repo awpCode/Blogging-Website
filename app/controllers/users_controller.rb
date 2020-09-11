@@ -27,7 +27,7 @@ class UsersController < ApplicationController
     if @user.save
       session[:user_id]=@user.id
       flash[:notice] = "Welcome to the Alpha Blog #{@user.username}, you have successfully signed up"
-      redirect_to articles_path
+      redirect_to user_path(@user)
     else
       render 'new'
     end
@@ -37,6 +37,11 @@ class UsersController < ApplicationController
     session[:user_id]=nil if @user == current_user
     flash[:notice] = "Account and all associcated article deleted successfully"
     redirect_to root_path
+  end
+  def makeAdmin
+    @user = User.find(params[:format].to_i)
+    @user.toggle!(:admin)
+    redirect_to users_path
   end
   private
   def user_params

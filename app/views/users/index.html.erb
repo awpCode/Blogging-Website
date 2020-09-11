@@ -23,6 +23,9 @@
                 <% if current_user.admin? %>
                   <%= link_to "Delete User",user_path(user),class: "btn btn-outline-danger",method: :delete ,data: {confirm: "Are you sure?"} %>
                 <% end %>
+                <% if current_user.admin? && current_user!=user && !user.admin? %>
+                    <%= link_to "Promote to admin",makeadmin_path(user),class: "btn btn-outline-success" %>
+                <% end %>
               <% end %>
             </div>
             <div class="card-footer text-muted">
