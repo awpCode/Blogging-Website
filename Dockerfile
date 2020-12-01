@@ -1,11 +1,17 @@
-FROM ruby:2.5
+FROM ruby:2.6.6
 RUN apt-get update -qq && apt-get install -y nodejs yarn
 WORKDIR /myapp
 COPY Gemfile /myapp/Gemfile
 COPY Gemfile.lock /myapp/Gemfile.lock
 RUN bundle install
-RUN yarn add bootstrap@4.3.1 jquery popper.js
 COPY . /myapp
+RUN apt remove cmdtest -y
+RUN apt remove yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update
+RUN apt-get install yarn -y
+RUN yarn add bootstrap@4.3.1 jquery popper.js
 
 # Add a script to be executed every time the container starts.
 COPY entrypoint.sh /usr/bin/
