@@ -7,7 +7,6 @@ before_install:
 - docker-compose run web rails db:create
 - docker-compose run web rails db:migrate
 
-
 rvm:
 - 2.6.6
 
@@ -15,10 +14,12 @@ jobs:
   include:
     - stage: unit tests
       script:
+       - docker-compose run web rails db:migrate RAILS_ENV=test
        - docker-compose run web rails test test/models/category_test.rb
        - docker-compose run web rails test test/controllers/categories_controller_test.rb
     - stage: integration tests
       script:
+        - docker-compose run web rails db:migrate RAILS_ENV=test
         - docker-compose run web rails test test/integration/create_category_test.rb
         - docker-compose run web rails test test/integration/list_categories_test.rb
     - stage: deploy
