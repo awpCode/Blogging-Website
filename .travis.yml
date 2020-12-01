@@ -1,20 +1,17 @@
 language: ruby
 services:
 - docker
+before_install:
+- docker-compose build
+- docker-compose run web yarn --check-files
+- docker-compose run web rails db:create
+- docker-compose run web rails db:migrate
 
 rvm:
 - 2.6.6
 
 jobs:
   include:
-    - stage: build
-      script:
-       - docker-compose build
-    - stage: setting database
-      script:
-       - docker-compose run web yarn --check-files
-       - docker-compose run web rails db:create
-       - docker-compose run web rails db:migrate
     - stage: unit tests
       script:
        - docker-compose run web rails db:migrate RAILS_ENV=test
