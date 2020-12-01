@@ -3,9 +3,10 @@ services:
 - docker
 before_install:
 - docker-compose build
+- docker-compose run web yarn --check-files
 - docker-compose run web rake db:create
 - docker-compose run web rake db:migrate
-- docker-compose run web yarn --check-files
+
 rvm:
 - 2.6.6
 script:
