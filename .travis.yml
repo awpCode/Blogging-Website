@@ -9,7 +9,19 @@ before_install:
 
 rvm:
 - 2.6.6
-script:
-- docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-- docker tag blog_app_web:travis-final $DOCKER_USERNAME/blog_app_web:travis-final
-- docker push $DOCKER_USERNAME/blog_app_web:travis-final
+
+jobs:
+  include:
+    - stage: unit tests
+      script:
+       - docker-compose run web rails test test/models/category_test.rb
+       - docker-compose run web rails test test/controllers/categories_controller_test.rb
+    - stage: integration tests
+      script:
+        - docker-compose run web rails test test/integration/create_category_test.rb
+        - docker-compose run web rails test test/integration/list_categories_test.rb
+    - stage: deploy
+      script:
+        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        - docker tag blog_app_web:travis-final $DOCKER_USERNAME/blog_app_web:travis-final
+        - docker push $DOCKER_USERNAME/blog_app_web:travis-final
