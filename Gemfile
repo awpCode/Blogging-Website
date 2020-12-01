@@ -42,6 +42,8 @@ group :test do
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '>= 2.15'
   gem 'selenium-webdriver'
+  gem 'ci_reporter'
+  gem 'ci_reporter_rspec'
   # Easy installation and use of web drivers to run system tests with browsers
   gem 'webdrivers'
 end
