@@ -6,24 +6,11 @@ before_install:
 - docker-compose run web yarn --check-files
 - docker-compose run web rails db:create
 - docker-compose run web rails db:migrate
-
 rvm:
 - 2.6.6
-
-jobs:
-  include:
-    - stage: unit tests
-      script:
-       - docker-compose run web rails db:migrate RAILS_ENV=test
-       - docker-compose run web rails test test/models/category_test.rb
-       - docker-compose run web rails test test/controllers/categories_controller_test.rb
-    - stage: integration tests
-      script:
-        - docker-compose run web rails db:migrate RAILS_ENV=test
-        - docker-compose run web rails test test/integration/create_category_test.rb
-        - docker-compose run web rails test test/integration/list_categories_test.rb
-    - stage: deploy
-      script:
-        - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-        - docker tag blog_app_web:travis-final $DOCKER_USERNAME/blog_app_web:travis-final
-        - docker push $DOCKER_USERNAME/blog_app_web:travis-final
+deploy:
+  provider: heroku
+  api_key:
+    secure: sVPusMaQ4somy6dAG4wqSS6aOboVcwffgHKAriTjn7EvpQj4XFtlIaCAoJA9a/rOpqpZVPrF0hsl8DixiDgnRyg/dHWrWeFR74faeSc8+RuH+W4IvMrOFEkHXoYfpnsFKAzKHNvms+VIEWAdmOSmR5Xwq1Q1BIPyQ9heKPKPFMIPYzV5esAHwY4LjteRck54hXweypX/+l3mFWYbH2SNNZbwofr/w1hTDK/ic7JIm41wjlvmMUAbArRoYp8aLes2fu/g+vg1BKsQAQe0FBijHh1S2qeK4cEe4QztCpKyNlqEd4TQM4lxWZDSl6vmLAAUAa/KShZL925buHAgloN84yiIUeUD+ENvfCcWmwg75hX1gPHmQEulcooSl6eVIGf/a8znlBlmRviRL+pZvv6EgvwNlRbtnVUQ7uxfXyUIFS9+M82o/eUPkGi2/nPj9uYtzj8gzzpp64rb/NAbUurU/mYiciuz4ZrYU1Dr8U4DqWqK2ObQupaSp577jk7lrl53biNuvheUH19e3Fvz3ZPr3u+ehZrRL/18+ebAVAXuqhauai4tSX3ulsnRWA7Kus0PRp0patDm4ErYMppfjHcDQzZj+Z8Mdt5V55buk+pktuQgDj3kdFBk3Xzg31JHYv3ExO792mgrxSSvzIZ8IUxXqMuur5XjfxIf4D8pzL5tIRI=
+    run:
+      - "rails db:migrate"
