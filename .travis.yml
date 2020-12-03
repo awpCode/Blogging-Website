@@ -1,32 +1,27 @@
 language: ruby
+services:
+- docker
+before_install:
+- docker-compose build
+- docker-compose run web yarn --check-files
+- docker-compose run web rails db:create
+- docker-compose run web rails db:migrate
 rvm:
 - 2.6.6
-cache:
-- bundler
-before_script:
-- bundle exec yarn --check-files
-- bundle exec rails db:create
-- bundle exec rails db:migrate
-- bundle exec rails assets:precompile
 jobs:
   include:
-  - stage: Unit tests
+  - stage: unit tests
     script:
-    - bundle exec rails db:migrate RAILS_ENV=test
-    - bundle exec rails test test/models/category_test.rb
-    - bundle exec rails test test/controllers/categories_controller_test.rb
-  - stage: Integration tests
+    - docker-compose run web rails db:migrate RAILS_ENV=test
+    - docker-compose run web rails test test/models/category_test.rb
+    - docker-compose run web rails test test/controllers/categories_controller_test.rb
+  - stage: integration tests
     script:
-    - bundle exec rails db:migrate RAILS_ENV=test
-    - bundle exec rails test test/integration/create_category_test.rb
-    - bundle exec rails test test/integration/list_categories_test.rb
-  - stage: deploy to production
-    deploy:
-      provider: heroku
-      api_key:
-          secure: Hd4wEzvaVUth/TMGhawe4BRMD0+EiyhXh0/QJXJHuX5l7iz6ATD28OhTgSp0zknMHooBFNHuHytIyhCb75qB17JNXMaZK4XEycTm2DwCTiGYibut9ZYx9MvprAVI6T3vtOk3MrD+eHDbmZnrXSitriRmzGNA+8OfhuLY18FMlBSXIQvJYbS7jyeNxbEIK5rVTSvGrPXK9pGjTbg/yveZxO2JBt/AzXeSfoXGsF0iOPcEX5NOibnvILyTFboxn5E2iaQFmImKSE6S71mwrJzIZ1uQtpWAF466/hjZgTB5zqIfg8/oVP3RUvj7sQyZgRLu/sNOq9XMFHGIB+9Q8oscMOPMZIhd6qxaFJ0JAqCQvB0dTkRU+Q8FoGLXhvPcrjAIh7YRLkiYrjdaz8LFjCRdP/JKh2PyK9bdWU7bJXH+1hDMq9LOU2T1NAS3xpdkVL3JsNRFDB6plEinaPAE80mgwqUIoeDLC6HTxZRNIVnWBnoKAnN4B5kYDAiR5XeGMx+Lsi3D+ItzENxlB5mWzmWZtBkI8+8QelKf/mTI6oqrMZ0GnqddPr4hObl8K3XbRrLRUJ9Q1EL90N5o9FhdNv99rrxFscN6CyZ5vADYJm4YafgH9Aa3BqHFt4RE3/U+DPWN/nRdYdGKp2CW256XUcRnW86MzusIz9RvssdXTNf1Ffk=
-      run:
-        - "rails db:migrate"
-      app: blogging-website-devops
-      on:
-      repo: awpCode/Blogging-Website
+    - docker-compose run web rails db:migrate RAILS_ENV=test
+    - docker-compose run web rails test test/integration/create_category_test.rb
+    - docker-compose run web rails test test/integration/list_categories_test.rb
+  - stage: deploy
+    script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker tag blog_app_web:travis-final $DOCKER_USERNAME/blog_app_web:travis-final
+    - docker push $DOCKER_USERNAME/blog_app_web:travis-final
